@@ -15,9 +15,94 @@ function ResumeForm() {
   const [goal, setGoal] = useState("");
   const [skills, setSkills] = useState("");
   const [result, setResult] = useState(null);
+  const [atsScore, setAtsScore] = useState(0);
+  const [jobDescription, setJobDescription] = useState("");
+  const [jobMatchScore, setJobMatchScore] = useState(0);
+  const [missingSkills, setMissingSkills] = useState([]);
+  const [resumeChecks, setResumeChecks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [resume, setResume] = useState("");
   const [uploadedFile, setUploadedFile] = useState(null);
+  const calculateATSScore = (resumeText) => {
+  let score = 0;
+
+  const text = resumeText.toLowerCase();
+
+  const skills = [
+    "python",
+    "java",
+    "sql",
+    "machine learning",
+    "git",
+    "react",
+    "javascript",
+  ];
+
+  let skillCount = 0;
+
+  skills.forEach((skill) => {
+    if (text.includes(skill)) {
+      skillCount++;
+    }
+  });
+
+  score += Math.min(skillCount * 5, 30);
+
+  if (text.includes("project")) score += 20;
+  if (text.includes("achievement")) score += 15;
+  if (text.includes("education")) score += 15;
+  if (text.includes("certification")) score += 10;
+  if (text.includes("experience")) score += 10;
+
+  return score;
+};
+const calculateJobMatch = () => {
+  if (!jobDescription || !resume) return;
+
+  const resumeText =
+  (resume + " " + skills).toLowerCase();
+  const jdText = jobDescription.toLowerCase();
+
+  const skillList = [
+  "python",
+  "java",
+  "sql",
+  "machine learning",
+  "git",
+  "react",
+  "javascript",
+  "docker",
+  "aws",
+  "tensorflow",
+  "pytorch",
+  "node.js",
+  "mongodb",
+];
+  const requiredSkills = skillList.filter((skill) =>
+  jdText.includes(skill)
+);
+
+  let matched = 0;
+  const missing = [];
+
+  requiredSkills.forEach((skill) => {
+    if (resumeText.includes(skill)) {
+      matched++;
+    } else {
+      missing.push(skill);
+    }
+  });
+
+  const score =
+    requiredSkills.length > 0
+      ? Math.round((matched / requiredSkills.length) * 100)
+      : 0;
+  console.log("Required Skills:", requiredSkills);
+  console.log("Match Score:", score);
+  console.log("Missing Skills:", missing);
+  setJobMatchScore(score);
+  setMissingSkills(missing);
+};
  const analyzeResume = async () => {
 
   if (!name || !goal || !skills || !resume) {
@@ -26,6 +111,37 @@ function ResumeForm() {
   }
   setResult("");
   setLoading(true);
+  const score = calculateATSScore(resume);
+  setAtsScore(score);
+  calculateJobMatch();
+  const checks = [];
+
+if (resume.toLowerCase().includes("project"))
+  checks.push("✅ Projects");
+else
+  checks.push("❌ Projects");
+
+if (resume.toLowerCase().includes("achievement"))
+  checks.push("✅ Achievements");
+else
+  checks.push("❌ Achievements");
+
+if (resume.toLowerCase().includes("education"))
+  checks.push("✅ Education");
+else
+  checks.push("❌ Education");
+
+if (resume.toLowerCase().includes("experience"))
+  checks.push("✅ Experience");
+else
+  checks.push("❌ Experience");
+
+if (resume.toLowerCase().includes("certification"))
+  checks.push("✅ Certifications");
+else
+  checks.push("❌ Certifications");
+
+setResumeChecks(checks);
 
   try {
       console.log(import.meta.env.VITE_GEMINI_API_KEY);
@@ -195,6 +311,16 @@ const handleFileUpload = async (event) => {
       />
 
 <br /><br />
+      <label>Job Description</label>
+
+      <textarea
+        placeholder="Paste Job Description Here"
+        value={jobDescription}
+        onChange={(e) => setJobDescription(e.target.value)}
+        rows="5"
+      />
+
+<br /><br />
       <label>Resume Content</label>
       <textarea
       placeholder="Paste Resume Content"
@@ -250,7 +376,38 @@ Solved 100+ coding problems.
 <br /><br />
 
     
+{atsScore > 0 && (
+  <div className="result-card">
+    <h3>📄 ATS Score</h3>
+    <h2>{atsScore}/100</h2>
+  </div>
+)}
+{resumeChecks.length > 0 && (
+  <div className="result-card">
+    <h3>📋 Resume Checklist</h3>
 
+    <ul>
+      {resumeChecks.map((item, index) => (
+        <li key={index}>{item}</li>
+      ))}
+    </ul>
+  </div>
+)}
+{jobDescription && (
+    <div className="result-card">
+    <h3>🎯 Job Match Score</h3>
+
+    <h2>{jobMatchScore}%</h2>
+
+    <h4>Missing Skills</h4>
+
+    <ul>
+      {missingSkills.map((skill, index) => (
+        <li key={index}>{skill}</li>
+      ))}
+    </ul>
+  </div>
+)}
 {result && (
   <div className="result-card">
     <h3>📊 AI Resume Analysis Report</h3>
