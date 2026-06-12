@@ -25,31 +25,61 @@ function ResumeForm() {
   const [loading, setLoading] = useState(false);
   const [resume, setResume] = useState("");
   const [uploadedFile, setUploadedFile] = useState(null);
-  const calculateATSScore = (resumeText) => {
+  const calculateATSScore = (resumeText, goal) => {
   let score = 0;
 
   const text = resumeText.toLowerCase();
 
-  const skills = [
+ let expectedSkills = [];
+
+if (goal.toLowerCase().includes("ai")) {
+  expectedSkills = [
     "python",
-    "java",
-    "sql",
     "machine learning",
+    "tensorflow",
+    "pytorch",
+    "docker",
+    "aws",
     "git",
-    "react",
-    "javascript",
   ];
+}
+
+else if (goal.toLowerCase().includes("data")) {
+  expectedSkills = [
+    "python",
+    "sql",
+    "pandas",
+    "numpy",
+    "statistics",
+    "power bi",
+  ];
+}
+
+else if (goal.toLowerCase().includes("full stack")) {
+  expectedSkills = [
+    "html",
+    "css",
+    "javascript",
+    "react",
+    "node.js",
+    "mongodb",
+    "git",
+  ];
+}
 
   let skillCount = 0;
 
-  skills.forEach((skill) => {
-    if (text.includes(skill)) {
-      skillCount++;
-    }
-  });
+expectedSkills.forEach((skill) => {
+  if (text.includes(skill)) {
+    skillCount++;
+  }
+});
 
-  score += Math.min(skillCount * 5, 30);
-
+if (expectedSkills.length > 0) {
+  score += Math.round(
+    (skillCount / expectedSkills.length) * 50
+  );
+}
   if (text.includes("project")) score += 20;
   if (text.includes("achievement")) score += 15;
   if (text.includes("education")) score += 15;
@@ -113,7 +143,10 @@ const calculateJobMatch = () => {
   }
   setResult("");
   setLoading(true);
-  const score = calculateATSScore(resume);
+  const score = calculateATSScore(
+  resume + " " + skills,
+  goal
+);
   setAtsScore(score);
   calculateJobMatch();
   const checks = [];
@@ -144,10 +177,8 @@ else
   checks.push("❌ Certifications");
 
 setResumeChecks(checks);
-let expectedSkills = [];
-
-if (goal.toLowerCase().includes("ai")) {
-  expectedSkills = [
+const roleSkills = {
+  "ai engineer": [
     "python",
     "machine learning",
     "tensorflow",
@@ -155,22 +186,18 @@ if (goal.toLowerCase().includes("ai")) {
     "docker",
     "aws",
     "git",
-  ];
-}
+  ],
 
-else if (goal.toLowerCase().includes("data")) {
-  expectedSkills = [
+  "data scientist": [
     "python",
     "sql",
     "pandas",
     "numpy",
     "statistics",
     "power bi",
-  ];
-}
+  ],
 
-else if (goal.toLowerCase().includes("full stack")) {
-  expectedSkills = [
+  "full stack developer": [
     "html",
     "css",
     "javascript",
@@ -178,8 +205,73 @@ else if (goal.toLowerCase().includes("full stack")) {
     "node.js",
     "mongodb",
     "git",
-  ];
-}
+  ],
+  "machine learning engineer": [
+  "python",
+  "machine learning",
+  "tensorflow",
+  "pytorch",
+  "scikit-learn",
+  "docker",
+  "git",
+],
+
+"frontend developer": [
+  "html",
+  "css",
+  "javascript",
+  "react",
+  "typescript",
+  "git",
+],
+
+"backend developer": [
+  "java",
+  "spring boot",
+  "sql",
+  "rest api",
+  "mongodb",
+  "git",
+],
+
+"java developer": [
+  "java",
+  "spring boot",
+  "hibernate",
+  "sql",
+  "microservices",
+  "git",
+],
+
+"cloud engineer": [
+  "aws",
+  "azure",
+  "docker",
+  "kubernetes",
+  "linux",
+  "terraform",
+],
+"devops engineer": [
+  "docker",
+  "kubernetes",
+  "jenkins",
+  "linux",
+  "aws",
+  "git",
+],
+
+"cybersecurity analyst": [
+  "linux",
+  "networking",
+  "wireshark",
+  "python",
+  "burp suite",
+  "metasploit",
+],
+};
+
+const expectedSkills =
+  roleSkills[goal.toLowerCase()] || [];
 
 const userSkills =
   (skills + " " + resume).toLowerCase();
