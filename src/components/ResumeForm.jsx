@@ -21,6 +21,7 @@ function ResumeForm() {
   const [missingSkills, setMissingSkills] = useState([]);
   const [resumeChecks, setResumeChecks] = useState([]);
   const [skillGap, setSkillGap] = useState([]);
+  const [matchedSkills, setMatchedSkills] = useState([]);
   const [loading, setLoading] = useState(false);
   const [resume, setResume] = useState("");
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -183,10 +184,15 @@ else if (goal.toLowerCase().includes("full stack")) {
 const userSkills =
   (skills + " " + resume).toLowerCase();
 
+const matched = expectedSkills.filter(
+  (skill) => userSkills.includes(skill)
+);
+
 const missingSkillGap = expectedSkills.filter(
   (skill) => !userSkills.includes(skill)
 );
 
+setMatchedSkills(matched);
 setSkillGap(missingSkillGap);
 
   try {
@@ -428,11 +434,19 @@ Solved 100+ coding problems.
     <h2>{atsScore}/100</h2>
   </div>
 )}
-{skillGap.length > 0 && (
+{(skillGap.length > 0 || matchedSkills.length > 0) && (
   <div className="result-card">
     <h3>📈 Skill Gap Analysis</h3>
 
-    <h4>Missing Skills for {goal}</h4>
+    <h4>✅ Matched Skills</h4>
+
+    <ul>
+      {matchedSkills.map((skill, index) => (
+        <li key={index}>✅ {skill}</li>
+      ))}
+    </ul>
+
+    <h4>❌ Missing Skills for {goal}</h4>
 
     <ul>
       {skillGap.map((skill, index) => (
