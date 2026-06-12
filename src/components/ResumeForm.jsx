@@ -20,6 +20,7 @@ function ResumeForm() {
   const [jobMatchScore, setJobMatchScore] = useState(0);
   const [missingSkills, setMissingSkills] = useState([]);
   const [resumeChecks, setResumeChecks] = useState([]);
+  const [skillGap, setSkillGap] = useState([]);
   const [loading, setLoading] = useState(false);
   const [resume, setResume] = useState("");
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -142,6 +143,51 @@ else
   checks.push("❌ Certifications");
 
 setResumeChecks(checks);
+let expectedSkills = [];
+
+if (goal.toLowerCase().includes("ai")) {
+  expectedSkills = [
+    "python",
+    "machine learning",
+    "tensorflow",
+    "pytorch",
+    "docker",
+    "aws",
+    "git",
+  ];
+}
+
+else if (goal.toLowerCase().includes("data")) {
+  expectedSkills = [
+    "python",
+    "sql",
+    "pandas",
+    "numpy",
+    "statistics",
+    "power bi",
+  ];
+}
+
+else if (goal.toLowerCase().includes("full stack")) {
+  expectedSkills = [
+    "html",
+    "css",
+    "javascript",
+    "react",
+    "node.js",
+    "mongodb",
+    "git",
+  ];
+}
+
+const userSkills =
+  (skills + " " + resume).toLowerCase();
+
+const missingSkillGap = expectedSkills.filter(
+  (skill) => !userSkills.includes(skill)
+);
+
+setSkillGap(missingSkillGap);
 
   try {
       console.log(import.meta.env.VITE_GEMINI_API_KEY);
@@ -380,6 +426,19 @@ Solved 100+ coding problems.
   <div className="result-card">
     <h3>📄 ATS Score</h3>
     <h2>{atsScore}/100</h2>
+  </div>
+)}
+{skillGap.length > 0 && (
+  <div className="result-card">
+    <h3>📈 Skill Gap Analysis</h3>
+
+    <h4>Missing Skills for {goal}</h4>
+
+    <ul>
+      {skillGap.map((skill, index) => (
+        <li key={index}>❌ {skill}</li>
+      ))}
+    </ul>
   </div>
 )}
 {resumeChecks.length > 0 && (
