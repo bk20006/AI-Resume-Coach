@@ -103,12 +103,32 @@ const calculateJobMatch = () => {
   "git",
   "react",
   "javascript",
+  "html",
+  "css",
+  "typescript",
   "docker",
   "aws",
+  "azure",
   "tensorflow",
   "pytorch",
   "node.js",
   "mongodb",
+  "spring boot",
+  "hibernate",
+  "microservices",
+  "rest api",
+  "kubernetes",
+  "linux",
+  "terraform",
+  "jenkins",
+  "networking",
+  "wireshark",
+  "burp suite",
+  "metasploit",
+  "pandas",
+  "numpy",
+  "statistics",
+  "power bi",
 ];
   const requiredSkills = skillList.filter((skill) =>
   jdText.includes(skill)
@@ -301,21 +321,30 @@ Candidate Name: ${name}
 
 Career Goal: ${goal}
 
-Skills: ${skills}
-Resume Content: ${resume}
+Job Description:
+${jobDescription}
 
-Analyze this profile and provide:
+Skills:
+${skills}
 
-1. Resume Score (out of 100)
-2. Recommended Career Role
-3. Strengths
-4. Missing Skills
-5. Learning Roadmap
-6. Suggested Projects
-7. Certifications Recommended
-8. Resume Improvement Suggestions
-9. Interview Preparation Tips
-10. Job Readiness Score (%)
+Resume Content:
+${resume}
+Analyze the resume against BOTH:
+1. The candidate's career goal.
+2. The provided job description.
+
+Give recommendations considering both.
+
+Provide:
+
+1. Recommended Career Role
+2. Strengths
+3. Missing Skills
+4. Learning Roadmap
+5. Suggested Projects
+6. Certifications Recommended
+7. Resume Improvement Suggestions
+8. Interview Preparation Tips
 
 Format the response with clear headings and bullet points.
 
@@ -329,10 +358,22 @@ For Interview Preparation Tips:
 - Important DSA topics.
 - Expected interview questions.
 
-For Job Readiness Score:
-- Give a percentage.
-- Explain why.
-`;
+
+For Missing Skills:
+- Separate skills missing for the Job Description.
+- Separate skills missing for the Career Goal.
+Do not repeat ATS scores, Job Match Scores, or Missing Skills already displayed by the application.
+
+Focus on providing:
+- Strengths
+- Career Guidance
+- Learning Roadmap
+- Suggested Projects
+- Certifications
+- Resume Improvements
+- Interview Preparation
+`
+;
     console.log("Sending request to Gemini...");
     const response = await model.generateContent(prompt);
     console.log("Received response from Gemini");
@@ -342,7 +383,10 @@ For Job Readiness Score:
     setResult(text);
 
   }catch (error) {
-  console.error(error);
+  console.error("Gemini Error:", error);
+
+  console.log("Error Message:", error.message);
+  console.log("Error Status:", error.status);
 
   if (error.message.includes("503")) {
     setResult(
@@ -431,12 +475,50 @@ const handleFileUpload = async (event) => {
 
       <br /><br />
       <label>Career Goal</label>
-      <input
-        type="text"
-        placeholder="Career Goal"
-        value={goal}
-        onChange={(e) => setGoal(e.target.value)}
-      />
+      <select
+  value={goal}
+  onChange={(e) => setGoal(e.target.value)}
+>
+  <option value="">Select Career Goal</option>
+
+  <option value="AI Engineer">AI Engineer</option>
+
+  <option value="Data Scientist">
+    Data Scientist
+  </option>
+
+  <option value="Machine Learning Engineer">
+    Machine Learning Engineer
+  </option>
+
+  <option value="Full Stack Developer">
+    Full Stack Developer
+  </option>
+
+  <option value="Frontend Developer">
+    Frontend Developer
+  </option>
+
+  <option value="Backend Developer">
+    Backend Developer
+  </option>
+
+  <option value="Java Developer">
+    Java Developer
+  </option>
+
+  <option value="Cloud Engineer">
+    Cloud Engineer
+  </option>
+
+  <option value="DevOps Engineer">
+    DevOps Engineer
+  </option>
+
+  <option value="Cybersecurity Analyst">
+    Cybersecurity Analyst
+  </option>
+</select>
 
       <br /><br />
       <label>Skills</label>
@@ -523,7 +605,65 @@ Solved 100+ coding problems.
 {atsScore > 0 && (
   <div className="result-card">
     <h3>📄 ATS Score</h3>
-    <h2>{atsScore}/100</h2>
+
+    <p
+      style={{
+        fontSize: "28px",
+        fontWeight: "bold",
+        color:
+          atsScore >= 80
+            ? "green"
+            : atsScore >= 50
+            ? "orange"
+            : "red",
+      }}
+    >
+      {atsScore}/100
+    </p>
+
+    <div
+      style={{
+        width: "100%",
+        height: "12px",
+        backgroundColor: "#444",
+        borderRadius: "10px",
+        marginTop: "10px",
+      }}
+    >
+      <div
+        style={{
+          width: `${atsScore}%`,
+          height: "100%",
+          backgroundColor:
+            atsScore >= 80
+              ? "green"
+              : atsScore >= 50
+              ? "orange"
+              : "red",
+          borderRadius: "10px",
+        }}
+      />
+    </div>
+
+    <p
+      style={{
+        marginTop: "12px",
+        color:
+  atsScore >= 80
+    ? "green"
+    : atsScore >= 50
+    ? "orange"
+    : "red",
+        fontWeight: "bold",
+      }}
+    >
+      {atsScore >= 80
+        ? "Excellent ATS Match"
+        : atsScore >= 50
+        ? "Moderate ATS Match"
+        : "Needs Improvement"}
+    </p>
+
   </div>
 )}
 {(skillGap.length > 0 || matchedSkills.length > 0) && (
@@ -562,29 +702,87 @@ Solved 100+ coding problems.
     <div className="result-card">
     <h3>🎯 Job Match Score</h3>
 
-    <h2>{jobMatchScore}%</h2>
+    <p
+  style={{
+    fontSize: "28px",
+    fontWeight: "bold",
+    color:
+      jobMatchScore >= 80
+        ? "green"
+        : jobMatchScore >= 50
+        ? "orange"
+        : "red",
+  }}
+>
+  {jobMatchScore}%
+</p>
+
+<div
+  style={{
+    width: "100%",
+    height: "12px",
+    backgroundColor: "#444",
+    borderRadius: "10px",
+    marginTop: "10px",
+  }}
+>
+  <div
+    style={{
+      width: `${jobMatchScore}%`,
+      height: "100%",
+      backgroundColor:
+        jobMatchScore >= 80
+          ? "green"
+          : jobMatchScore >= 50
+          ? "orange"
+          : "red",
+      borderRadius: "10px",
+    }}
+  />
+</div>
+
+<p
+  style={{
+    marginTop: "12px",
+    fontWeight: "bold",
+    color:
+      jobMatchScore >= 80
+        ? "green"
+        : jobMatchScore >= 50
+        ? "orange"
+        : "red",
+  }}
+>
+  {jobMatchScore >= 80
+    ? "Strong Match"
+    : jobMatchScore >= 50
+    ? "Partial Match"
+    : "Weak Match"}
+</p>
 
     <h4>Missing Skills</h4>
 
     <ul>
       {missingSkills.map((skill, index) => (
-        <li key={index}>{skill}</li>
-      ))}
+  <li key={index}>{skill}</li>
+))}
     </ul>
   </div>
 )}
 {result && (
   <div className="result-card">
-    <h3>📊 AI Resume Analysis Report</h3>
+    <h3>🤖 AI Career Guidance Report</h3>
 
-    <pre
-      style={{
-        whiteSpace: "pre-wrap",
-        textAlign: "left",
-      }}
-    >
-      {result}
-    </pre>
+    <div
+  style={{
+    whiteSpace: "pre-wrap",
+    textAlign: "left",
+    lineHeight: "1.8",
+    fontSize: "16px",
+  }}
+>
+  {result}
+</div>
   </div>
 )}
 
